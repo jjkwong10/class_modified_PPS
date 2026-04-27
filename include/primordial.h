@@ -9,6 +9,7 @@
 
 enum primordial_spectrum_type {
                                analytic_Pk,
+                               modified_Pk, /** (Jon) newly defined PPS type that admits the modifications  */
                                two_scales,
                                inflation_V,
                                inflation_H,
@@ -21,6 +22,14 @@ enum primordial_spectrum_type {
 enum linear_or_logarithmic {
                             linear,
                             logarithmic
+};
+
+/**(Jon) enum defining the type of global oscillation modification to the analytic PPS */
+
+enum oscillation_model_type {
+                            osc_log,
+                            osc_lin,
+                            osc_rf
 };
 
 /** enum defining the type of inflation potential function V(phi) */
@@ -156,6 +165,17 @@ struct primordial {
   double c_nid_niv; /**< NIDxNIV cross-correlation at pivot scale, from -1 to 1 */
   double n_nid_niv; /**< NIDxNIV cross-correlation tilt */
   double alpha_nid_niv; /**< NIDxNIV cross-correlation running */
+
+  /* (Jon) parameters for modifying the analytic PPS describing the case primordial_spec_type = modified_Pk : feature amplitudes, feature frequencies, ... */
+  /* (Jon) Currently the only modification feature added is the one for global oscillation modes (section 7.1.1 in Plank 2018 II) */
+
+  enum oscillation_model_type osc_model_type; /**(Jon) < type of oscillation model modifying the analytic power spectrum (logarithmic, linear etc.) */
+
+  double A_X; /**(Jon)< global oscillation feature amplitude (relative to A_s) */
+  double omega_X; /**(Jon)< global oscillation feature frequency */
+  double phi_X; /**(Jon)< global oscillation feature phase */
+  double alpha_rf; /**(Jon)< running frequency factor (relative to global oscillation frequency) */
+
 
   /** parameters describing the case primordial_spec_type = inflation_V */
 

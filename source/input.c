@@ -4137,6 +4137,9 @@ int input_read_parameters_primordial(struct file_content * pfc,
     if (strcmp(string1,"analytic_Pk") == 0){
       ppm->primordial_spec_type = analytic_Pk;
     }
+    else if (strcmp(string1,"modified_Pk") == 0){
+      ppm->primordial_spec_type = modified_Pk;
+    }
     else if (strcmp(string1,"inflation_V") == 0){
       ppm->primordial_spec_type = inflation_V;
     }
@@ -4162,8 +4165,8 @@ int input_read_parameters_primordial(struct file_content * pfc,
   /* Read */
   class_read_double("k_pivot",ppm->k_pivot);
 
-  /** 1.b) For type 'analytic_Pk' */
-  if (ppm->primordial_spec_type == analytic_Pk) {
+  /** 1.b) For type 'analytic_Pk' or (Jon) 'modified_Pk' */
+  if ((ppm->primordial_spec_type == analytic_Pk) || (ppm->primordial_spec_type == modified_Pk)) {
 
     /** 1.b.1) For scalar perturbations */
     if (ppt->has_scalars == _TRUE_) {
@@ -4307,6 +4310,34 @@ int input_read_parameters_primordial(struct file_content * pfc,
           ppm->alpha_t = ppm->r/8.*(ppm->r/8.+ppm->n_s-1.);     // enforce single slow-roll self-consistency condition (order 2 in slow-roll)
         }
       }
+    }
+
+    /**(Jon) 1.b.3) For modified Pk */
+    if (ppm->primordial_spec_type == modified_Pk) {
+      /**(Jon) 1.b.3.1) For global oscillation modifications */
+      /* Read */
+      class_call(parser_read_string(pfc,"osc_model_type",&string1,&flag1,errmsg),
+                 errmsg,
+                 errmsg);
+                 
+      if (flag1 == _TRUE_) {
+        if (strcmp(string1, "logarithmic") == 0) {
+          ppm->osc_model_type = osc_log;
+        } 
+        else if (strcmp(string1, "linear") == 0) {
+          ppm->osc_model_type = osc_lin;
+        } 
+        else if (strcmp(string1, "running_frequency") == 0) {
+          ppm->osc_model_type = osc_rf;
+        } 
+        else {
+          class_stop(errmsg, "Value of osc_model_type not recognized. Choose 'logarithmic', 'linear', or 'running_frequency'.");
+        }
+      }
+      class_read_double("A_X", ppm->A_X);
+      class_read_double("omega_X", ppm->omega_X);
+      class_read_double("phi_X", ppm->phi_X);
+      class_read_double("alpha_rf", ppm->alpha_rf);
     }
   }
 
@@ -6067,6 +6098,13 @@ int input_default_params(struct background *pba,
   ppm->r = 1.;
   ppm->n_t = -ppm->r/8.*(2.-ppm->r/8.-ppm->n_s);
   ppm->alpha_t = ppm->r/8.*(ppm->r/8.+ppm->n_s-1.);
+  /**(Jon) 1.b.3) For modified Pk defaults */
+  /**(Jon) 1.b.3.1) For global oscillation model */
+  ppm->osc_model_type = osc_log; 
+  ppm->A_X = 0.;  
+  ppm->omega_X = 0.;
+  ppm->phi_X = 0.;
+  ppm->alpha_rf = 0.;
   /** 1.c) For type 'inflation_V' */
   /** 1.c.2) Coefficients of the Taylor expansion */
   ppm->V0=1.25e-13;
