@@ -4342,9 +4342,9 @@ int input_read_parameters_primordial(struct file_content * pfc,
           class_stop(errmsg, "Value of osc_model_type not recognized. Choose 'logarithmic', 'linear', or 'running_frequency'.");
         }
       }
-      class_read_double("A_gosc", ppm->A_gosc);
+      class_read_double("A_gosc_sin", ppm->A_gosc_sin);
+      class_read_double("A_gosc_cos", ppm->A_gosc_cos);
       class_read_double("omega_gosc", ppm->omega_gosc);
-      class_read_double("phi_gosc", ppm->phi_gosc);
       class_read_double("alpha_rf", ppm->alpha_rf);
     }
     /**(Jon) 1.b.3.2) For local oscillation modifications */
@@ -6116,9 +6116,9 @@ int input_default_params(struct background *pba,
   /**(Jon) 1.b.3) For modifications to analytic Pk */
   /**(Jon) 1.b.3.1) For global oscillation model */
   ppm->osc_model_type = osc_log; 
-  ppm->A_gosc = 0.;  
+  ppm->A_gosc_sin = 0.;
+  ppm->A_gosc_cos = 0.;
   ppm->omega_gosc = 0.;
-  ppm->phi_gosc = 0.;
   ppm->alpha_rf = 0.;
   /**(Jon) 1.b.3.2) For local oscillation model */
   ppm->A_losc = 0.;  

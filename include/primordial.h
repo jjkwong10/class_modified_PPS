@@ -169,9 +169,9 @@ struct primordial {
   /* (Jon) modification 1: global oscillation model */
   short has_global_osc; /**(Jon)< flag for global oscillation modification */
   enum global_osc_model_type osc_model_type; /**(Jon) < type of oscillation model modifying the analytic power spectrum (logarithmic, linear etc.) */
-  double A_gosc; /**(Jon)< global oscillation feature amplitude (relative to A_s) */
+  double A_gosc_sin; /**(Jon)< global oscillation feature sine amplitude (relative to analytic amplitude) */
+  double A_gosc_cos; /**(Jon)< global oscillation feature cosine amplitude (relative to analytic amplitude) */
   double omega_gosc; /**(Jon)< global oscillation feature frequency */
-  double phi_gosc; /**(Jon)< global oscillation feature phase */
   double alpha_rf; /**(Jon)< running frequency factor (relative to global oscillation frequency) */
 
   /* (Jon) modification 2: local oscillation model */

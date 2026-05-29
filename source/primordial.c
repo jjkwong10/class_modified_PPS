@@ -955,13 +955,13 @@ int primordial_analytic_spectrum(
     if ((ppm->has_global_osc == _TRUE_) && (index_md == 0)) { /**(Jon) note that the second condition is meant to check that this is a scalar mode */
         
         if (ppm->osc_model_type == osc_log) {
-            *pk *= (1. + ppm->A_gosc * cos(ppm->omega_gosc * log(k/ppm->k_pivot) + ppm->phi_gosc));
+            *pk *= (1. + ppm->A_gosc_sin * sin(ppm->omega_gosc * log(k/ppm->k_pivot)) + ppm->A_gosc_cos * cos(ppm->omega_gosc * log(k/ppm->k_pivot)));
         }
         else if (ppm->osc_model_type == osc_lin) {
-            *pk *= (1. + ppm->A_gosc * cos(ppm->omega_gosc * (k/ppm->k_pivot) + ppm->phi_gosc)); 
+            *pk *= (1. + ppm->A_gosc_sin * sin(ppm->omega_gosc * (k/ppm->k_pivot)) + ppm->A_gosc_cos * cos(ppm->omega_gosc * (k/ppm->k_pivot))); 
         }
         else if (ppm->osc_model_type == osc_rf) {
-            *pk *= (1. + ppm->A_gosc * cos(ppm->omega_gosc * log(k/ppm->k_pivot) + ppm->alpha_rf * pow(log(k/ppm->k_pivot), 2.) + ppm->phi_gosc));
+            *pk *= (1. + ppm->A_gosc_sin * sin(ppm->omega_gosc * log(k/ppm->k_pivot) + ppm->alpha_rf * pow(log(k/ppm->k_pivot), 2.)) + ppm->A_gosc_cos * cos(ppm->omega_gosc * log(k/ppm->k_pivot) + ppm->alpha_rf * pow(log(k/ppm->k_pivot), 2.)));
         }
     }
 
