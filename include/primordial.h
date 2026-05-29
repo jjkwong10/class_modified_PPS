@@ -9,7 +9,6 @@
 
 enum primordial_spectrum_type {
                                analytic_Pk,
-                               modified_Pk, /** (Jon) newly defined PPS type that admits the modifications  */
                                two_scales,
                                inflation_V,
                                inflation_H,
@@ -24,9 +23,9 @@ enum linear_or_logarithmic {
                             logarithmic
 };
 
-/**(Jon) enum defining the type of global oscillation modification to the analytic PPS */
+/**(Jon) enum defining the oscillation type for the global oscillation modification */
 
-enum oscillation_model_type {
+enum global_osc_model_type {
                             osc_log,
                             osc_lin,
                             osc_rf
@@ -166,16 +165,20 @@ struct primordial {
   double n_nid_niv; /**< NIDxNIV cross-correlation tilt */
   double alpha_nid_niv; /**< NIDxNIV cross-correlation running */
 
-  /* (Jon) parameters for modifying the analytic PPS describing the case primordial_spec_type = modified_Pk : feature amplitudes, feature frequencies, ... */
-  /* (Jon) Currently the only modification feature added is the one for global oscillation modes (section 7.1.1 in Plank 2018 II) */
-
-  enum oscillation_model_type osc_model_type; /**(Jon) < type of oscillation model modifying the analytic power spectrum (logarithmic, linear etc.) */
-
-  double A_X; /**(Jon)< global oscillation feature amplitude (relative to A_s) */
-  double omega_X; /**(Jon)< global oscillation feature frequency */
-  double phi_X; /**(Jon)< global oscillation feature phase */
+  /* (Jon) parameters for modifying the analytic PPS: flags for each feature, feature amplitudes, feature frequencies, ... */
+  /* (Jon) modification 1: global oscillation model */
+  short has_global_osc; /**(Jon)< flag for global oscillation modification */
+  enum global_osc_model_type osc_model_type; /**(Jon) < type of oscillation model modifying the analytic power spectrum (logarithmic, linear etc.) */
+  double A_gosc; /**(Jon)< global oscillation feature amplitude (relative to A_s) */
+  double omega_gosc; /**(Jon)< global oscillation feature frequency */
+  double phi_gosc; /**(Jon)< global oscillation feature phase */
   double alpha_rf; /**(Jon)< running frequency factor (relative to global oscillation frequency) */
 
+  /* (Jon) modification 2: local oscillation model */
+  short has_local_osc; /**(Jon)< flag for local oscillation modification */
+  double A_losc; /**(Jon)< local oscillation feature amplitude */
+  double k_losc; /**(Jon)< position of step in k-space */
+  double x_losc; /**(Jon)< width of the envelope function */
 
   /** parameters describing the case primordial_spec_type = inflation_V */
 

@@ -4137,9 +4137,6 @@ int input_read_parameters_primordial(struct file_content * pfc,
     if (strcmp(string1,"analytic_Pk") == 0){
       ppm->primordial_spec_type = analytic_Pk;
     }
-    else if (strcmp(string1,"modified_Pk") == 0){
-      ppm->primordial_spec_type = modified_Pk;
-    }
     else if (strcmp(string1,"inflation_V") == 0){
       ppm->primordial_spec_type = inflation_V;
     }
@@ -4165,8 +4162,8 @@ int input_read_parameters_primordial(struct file_content * pfc,
   /* Read */
   class_read_double("k_pivot",ppm->k_pivot);
 
-  /** 1.b) For type 'analytic_Pk' or (Jon) 'modified_Pk' */
-  if ((ppm->primordial_spec_type == analytic_Pk) || (ppm->primordial_spec_type == modified_Pk)) {
+  /** 1.b) For type 'analytic_Pk' */
+  if (ppm->primordial_spec_type == analytic_Pk) {
 
     /** 1.b.1) For scalar perturbations */
     if (ppt->has_scalars == _TRUE_) {
@@ -4312,9 +4309,20 @@ int input_read_parameters_primordial(struct file_content * pfc,
       }
     }
 
-    /**(Jon) 1.b.3) For modified Pk */
-    if (ppm->primordial_spec_type == modified_Pk) {
-      /**(Jon) 1.b.3.1) For global oscillation modifications */
+    /**(Jon) 1.b.3) Modifications to scalar perturbations */
+    /**(Jon) input allowing for multiple modifications to the  */
+    ppm->has_global_osc = _FALSE_;
+    ppm->has_local_osc = _FALSE_;
+    class_read_string("modifications", string1);
+
+    if (strstr(string1, "global") != NULL) {
+    ppm->has_global_osc = _TRUE_;
+    }
+    if (strstr(string1, "local") != NULL) {
+    ppm->has_local_osc = _TRUE_;
+    }
+    /**(Jon) 1.b.3.1) For global oscillation modifications */
+    if (ppm->has_global_osc == _TRUE_) {
       /* Read */
       class_call(parser_read_string(pfc,"osc_model_type",&string1,&flag1,errmsg),
                  errmsg,
@@ -4334,10 +4342,17 @@ int input_read_parameters_primordial(struct file_content * pfc,
           class_stop(errmsg, "Value of osc_model_type not recognized. Choose 'logarithmic', 'linear', or 'running_frequency'.");
         }
       }
-      class_read_double("A_X", ppm->A_X);
-      class_read_double("omega_X", ppm->omega_X);
-      class_read_double("phi_X", ppm->phi_X);
+      class_read_double("A_gosc", ppm->A_gosc);
+      class_read_double("omega_gosc", ppm->omega_gosc);
+      class_read_double("phi_gosc", ppm->phi_gosc);
       class_read_double("alpha_rf", ppm->alpha_rf);
+    }
+    /**(Jon) 1.b.3.2) For local oscillation modifications */
+    if (ppm->has_local_osc == _TRUE_) {
+      /* Read */
+      class_read_double("A_losc", ppm->A_losc);
+      class_read_double("k_losc", ppm->k_losc);
+      class_read_double("x_losc", ppm->x_losc);
     }
   }
 
@@ -6098,13 +6113,17 @@ int input_default_params(struct background *pba,
   ppm->r = 1.;
   ppm->n_t = -ppm->r/8.*(2.-ppm->r/8.-ppm->n_s);
   ppm->alpha_t = ppm->r/8.*(ppm->r/8.+ppm->n_s-1.);
-  /**(Jon) 1.b.3) For modified Pk defaults */
+  /**(Jon) 1.b.3) For modifications to analytic Pk */
   /**(Jon) 1.b.3.1) For global oscillation model */
   ppm->osc_model_type = osc_log; 
-  ppm->A_X = 0.;  
-  ppm->omega_X = 0.;
-  ppm->phi_X = 0.;
+  ppm->A_gosc = 0.;  
+  ppm->omega_gosc = 0.;
+  ppm->phi_gosc = 0.;
   ppm->alpha_rf = 0.;
+  /**(Jon) 1.b.3.2) For local oscillation model */
+  ppm->A_losc = 0.;  
+  ppm->k_losc = 0.01;
+  ppm->x_losc = 1.;
   /** 1.c) For type 'inflation_V' */
   /** 1.c.2) Coefficients of the Taylor expansion */
   ppm->V0=1.25e-13;

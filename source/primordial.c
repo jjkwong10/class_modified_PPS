@@ -83,7 +83,7 @@ int primordial_spectrum_at_k(
 
   if ((lnk > ppm->lnk[ppm->lnk_size-1]) || (lnk < ppm->lnk[0])) {
 
-    class_test((ppm->primordial_spec_type != analytic_Pk) && (ppm->primordial_spec_type != modified_Pk), /**(Jon) added modified_Pk*/
+    class_test(ppm->primordial_spec_type != analytic_Pk,
                ppm->error_message,
                "k=%e out of range [%e : %e]",exp(lnk),exp(ppm->lnk[0]),exp(ppm->lnk[ppm->lnk_size-1]));
 
@@ -265,7 +265,7 @@ int primordial_init(
 
   /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
 
-  if ((ppm->primordial_spec_type == analytic_Pk) || (ppm->primordial_spec_type == modified_Pk)) { /**(Jon) added modified_Pk*/
+  if (ppm->primordial_spec_type == analytic_Pk) {
 
     if (ppm->primordial_verbose > 0)
       printf(" (analytic spectrum)\n");
@@ -427,7 +427,7 @@ int primordial_init(
   /** - derive spectral parameters from numerically computed spectra
       (not used by the rest of the code, but useful to keep in memory for several types of investigation) */
 
-  if ((ppm->primordial_spec_type != analytic_Pk) && (ppm->primordial_spec_type != modified_Pk)) { /**(Jon) added modified_Pk*/
+  if (ppm->primordial_spec_type != analytic_Pk) { 
     dlnk = log(10.)/ppr->k_per_decade_primordial;
 
     if (ppt->has_scalars == _TRUE_) {
@@ -563,7 +563,7 @@ int primordial_free(
 
   if (ppm->lnk_size > 0) {
 
-    if ((ppm->primordial_spec_type == analytic_Pk) || (ppm->primordial_spec_type == modified_Pk)) { /**(Jon) added modified_Pk*/
+    if (ppm->primordial_spec_type == analytic_Pk) {
       for (index_md = 0; index_md < ppm->md_size; index_md++) {
         free(ppm->amplitude[index_md]);
         free(ppm->tilt[index_md]);
@@ -927,7 +927,7 @@ int primordial_analytic_spectrum_init(
  * This routine returns the primordial spectrum in the simple analytic case with
  * amplitudes, tilts, runnings, for each mode (scalar/tensor...),
  * pair of initial conditions, and wavenumber.
- * (Jon) This routine has also been ammended to accomodate modifications via modified_Pk to the PPS
+ * (Jon) This routine has also been ammended to accomodate modifications to analytic_Pk
  *
  * @param ppm            Input/output: pointer to primordial structure
  * @param index_md     Input: index of mode (scalar, tensor, ...)
@@ -950,20 +950,63 @@ int primordial_analytic_spectrum(
       *exp((ppm->tilt[index_md][index_ic1_ic2]-1.)*log(k/ppm->k_pivot)
            + 0.5 * ppm->running[index_md][index_ic1_ic2] * pow(log(k/ppm->k_pivot), 2.));
 
-    /** (Jon) Apply modification for modified_Pk type on scalar curvature perturbations ONLY */
-    if ((ppm->primordial_spec_type == modified_Pk) && (index_md == 0)) { /**(Jon) note that the second condition is meant to check that this is a scalar mode */
+    /** (Jon) Apply modifications to scalar curvature perturbations ONLY */
+    /** (Jon) Global oscillation modification */
+    if ((ppm->has_global_osc == _TRUE_) && (index_md == 0)) { /**(Jon) note that the second condition is meant to check that this is a scalar mode */
         
         if (ppm->osc_model_type == osc_log) {
-            *pk *= (1. + ppm->A_X * cos(ppm->omega_X * log(k/ppm->k_pivot) + ppm->phi_X));
+            *pk *= (1. + ppm->A_gosc * cos(ppm->omega_gosc * log(k/ppm->k_pivot) + ppm->phi_gosc));
         }
         else if (ppm->osc_model_type == osc_lin) {
-            *pk *= (1. + ppm->A_X * cos(ppm->omega_X * (k/ppm->k_pivot) + ppm->phi_X)); 
+            *pk *= (1. + ppm->A_gosc * cos(ppm->omega_gosc * (k/ppm->k_pivot) + ppm->phi_gosc)); 
         }
         else if (ppm->osc_model_type == osc_rf) {
-            *pk *= (1. + ppm->A_X * cos(ppm->omega_X * log(k/ppm->k_pivot) + ppm->alpha_rf * pow(log(k/ppm->k_pivot), 2.) + ppm->phi_X));
+            *pk *= (1. + ppm->A_gosc * cos(ppm->omega_gosc * log(k/ppm->k_pivot) + ppm->alpha_rf * pow(log(k/ppm->k_pivot), 2.) + ppm->phi_gosc));
         }
     }
 
+    /** (Jon) Local oscillation modification (inflation step model) */
+    if (ppm->has_local_osc == _TRUE_) {
+        double x_arg = k / ppm->k_losc;
+        double u_arg = x_arg / ppm->x_losc;
+        double ns = ppm->tilt[index_md][index_ic1_ic2];
+        
+        /* Damping function */
+        double damp;
+        if (u_arg < 1e-4) {
+            damp = 1.0;
+        } else if (u_arg > 50.0) {
+            damp = 0.0;
+        } else {
+            damp = u_arg / sinh(u_arg);
+        }
+        
+        /* Window function W0 */
+        double w0;
+        if (x_arg < 1e-3) {
+            w0 = 0.8 * x_arg; // Leading order expansion
+        } else {
+            double x2 = x_arg * x_arg;
+            double x3 = x2 * x_arg;
+            double x4 = x2 * x2;
+            w0 = (1.0 / (2.0 * x4)) * ((18.0 * x_arg - 6.0 * x3) * cos(2.0 * x_arg) + (15.0 * x2 - 9.0) * sin(2.0 * x_arg));
+        }
+        
+        /* Window function W1 */
+        double w1;
+        if (x_arg < 1e-3) {
+            w1 = x_arg * x_arg; // Leading order expansion
+        } else {
+            double x2 = x_arg * x_arg;
+            double x4 = x2 * x2;
+            w1 = (-3.0 / x4) * (x_arg * cos(x_arg) - sin(x_arg)) * (3.0 * x_arg * cos(x_arg) + (2.0 * x2 - 3.0) * sin(x_arg));
+        }
+        
+        double I0 = ppm->A_losc * w0 * damp;
+        double I1_osc_term = ppm->A_losc * w1 * damp;
+        double I1 = (1.0 / sqrt(2.0)) * (0.5 * M_PI * (1.0 - ns) + I1_osc_term);
+        *pk *= exp(I0) * (1.0 + I1 * I1);
+    }
   }
   else {
     *pk = 0.;
