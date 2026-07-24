@@ -23,6 +23,14 @@ enum linear_or_logarithmic {
                             logarithmic
 };
 
+/**(Jon) enum defining the oscillation type for the global oscillation modification */
+
+enum global_osc_model_type {
+                            osc_log,
+                            osc_lin,
+                            osc_rf
+};
+
 /** enum defining the type of inflation potential function V(phi) */
 
 enum potential_shape {
@@ -156,6 +164,21 @@ struct primordial {
   double c_nid_niv; /**< NIDxNIV cross-correlation at pivot scale, from -1 to 1 */
   double n_nid_niv; /**< NIDxNIV cross-correlation tilt */
   double alpha_nid_niv; /**< NIDxNIV cross-correlation running */
+
+  /* (Jon) parameters for modifying the analytic PPS: flags for each feature, feature amplitudes, feature frequencies, ... */
+  /* (Jon) modification 1: global oscillation model */
+  short has_global_osc; /**(Jon)< flag for global oscillation modification */
+  enum global_osc_model_type osc_model_type; /**(Jon) < type of oscillation model modifying the analytic power spectrum (logarithmic, linear etc.) */
+  double A_gosc_sin; /**(Jon)< global oscillation feature sine amplitude (relative to analytic amplitude) */
+  double A_gosc_cos; /**(Jon)< global oscillation feature cosine amplitude (relative to analytic amplitude) */
+  double omega_gosc; /**(Jon)< global oscillation feature frequency */
+  double alpha_rf; /**(Jon)< running frequency factor (relative to global oscillation frequency) */
+
+  /* (Jon) modification 2: local oscillation model */
+  short has_local_osc; /**(Jon)< flag for local oscillation modification */
+  double A_losc; /**(Jon)< local oscillation feature amplitude */
+  double k_losc; /**(Jon)< position of step in k-space */
+  double x_losc; /**(Jon)< width of the envelope function */
 
   /** parameters describing the case primordial_spec_type = inflation_V */
 

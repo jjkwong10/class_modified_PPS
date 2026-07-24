@@ -4308,6 +4308,52 @@ int input_read_parameters_primordial(struct file_content * pfc,
         }
       }
     }
+
+    /**(Jon) 1.b.3) Modifications to scalar perturbations */
+    /**(Jon) input allowing for multiple modifications to the  */
+    ppm->has_global_osc = _FALSE_;
+    ppm->has_local_osc = _FALSE_;
+    class_read_string("modifications", string1);
+
+    if (strstr(string1, "global") != NULL) {
+    ppm->has_global_osc = _TRUE_;
+    }
+    if (strstr(string1, "local") != NULL) {
+    ppm->has_local_osc = _TRUE_;
+    }
+    /**(Jon) 1.b.3.1) For global oscillation modifications */
+    if (ppm->has_global_osc == _TRUE_) {
+      /* Read */
+      class_call(parser_read_string(pfc,"osc_model_type",&string1,&flag1,errmsg),
+                 errmsg,
+                 errmsg);
+                 
+      if (flag1 == _TRUE_) {
+        if (strcmp(string1, "logarithmic") == 0) {
+          ppm->osc_model_type = osc_log;
+        } 
+        else if (strcmp(string1, "linear") == 0) {
+          ppm->osc_model_type = osc_lin;
+        } 
+        else if (strcmp(string1, "running_frequency") == 0) {
+          ppm->osc_model_type = osc_rf;
+        } 
+        else {
+          class_stop(errmsg, "Value of osc_model_type not recognized. Choose 'logarithmic', 'linear', or 'running_frequency'.");
+        }
+      }
+      class_read_double("A_gosc_sin", ppm->A_gosc_sin);
+      class_read_double("A_gosc_cos", ppm->A_gosc_cos);
+      class_read_double("omega_gosc", ppm->omega_gosc);
+      class_read_double("alpha_rf", ppm->alpha_rf);
+    }
+    /**(Jon) 1.b.3.2) For local oscillation modifications */
+    if (ppm->has_local_osc == _TRUE_) {
+      /* Read */
+      class_read_double("A_losc", ppm->A_losc);
+      class_read_double("k_losc", ppm->k_losc);
+      class_read_double("x_losc", ppm->x_losc);
+    }
   }
 
   else if ((ppm->primordial_spec_type == inflation_V) || (ppm->primordial_spec_type == inflation_H)) {
@@ -6067,6 +6113,17 @@ int input_default_params(struct background *pba,
   ppm->r = 1.;
   ppm->n_t = -ppm->r/8.*(2.-ppm->r/8.-ppm->n_s);
   ppm->alpha_t = ppm->r/8.*(ppm->r/8.+ppm->n_s-1.);
+  /**(Jon) 1.b.3) For modifications to analytic Pk */
+  /**(Jon) 1.b.3.1) For global oscillation model */
+  ppm->osc_model_type = osc_log; 
+  ppm->A_gosc_sin = 0.;
+  ppm->A_gosc_cos = 0.;
+  ppm->omega_gosc = 0.;
+  ppm->alpha_rf = 0.;
+  /**(Jon) 1.b.3.2) For local oscillation model */
+  ppm->A_losc = 0.;  
+  ppm->k_losc = 0.01;
+  ppm->x_losc = 1.;
   /** 1.c) For type 'inflation_V' */
   /** 1.c.2) Coefficients of the Taylor expansion */
   ppm->V0=1.25e-13;
