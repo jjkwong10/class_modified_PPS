@@ -1007,6 +1007,11 @@ int primordial_analytic_spectrum(
         double I1 = (1.0 / sqrt(2.0)) * (0.5 * M_PI * (1.0 - ns) + I1_osc_term);
         *pk *= exp(I0) * (1.0 + I1 * I1);
     }
+
+    /** (Jon) axion monodromy oscillation modification */
+    if ((ppm->has_axion_osc == _TRUE_) && (index_md == 0)) { /**(Jon) note that the second condition is meant to check that this is a scalar mode */
+      *pk *= (1. + ppm->A_ax_sin * sin(12.38/ppm->f_ax_Mpl*std::pow(std::sqrt(std::pow(0.59,2)+2*ppm->p_ax*(57.5-log(k/ppm->k_pivot)))/12.38,1+ppm->p_f_ax)) + ppm->A_ax_cos * cos(12.38/ppm->f_ax_Mpl*std::pow(std::sqrt(std::pow(0.59,2)+2*ppm->p_ax*(57.5-log(k/ppm->k_pivot)))/12.38,1+ppm->p_f_ax)));
+    }
   }
   else {
     *pk = 0.;

@@ -4310,9 +4310,10 @@ int input_read_parameters_primordial(struct file_content * pfc,
     }
 
     /**(Jon) 1.b.3) Modifications to scalar perturbations */
-    /**(Jon) input allowing for multiple modifications to the  */
+    /**(Jon) input allowing for multiple modifications to the PPS*/
     ppm->has_global_osc = _FALSE_;
     ppm->has_local_osc = _FALSE_;
+    ppm->has_axion_osc = _FALSE_;
     class_read_string("modifications", string1);
 
     if (strstr(string1, "global") != NULL) {
@@ -4320,6 +4321,9 @@ int input_read_parameters_primordial(struct file_content * pfc,
     }
     if (strstr(string1, "local") != NULL) {
     ppm->has_local_osc = _TRUE_;
+    }
+    if (strstr(string1, "axion") != NULL) {
+    ppm->has_axion_osc = _TRUE_;
     }
     /**(Jon) 1.b.3.1) For global oscillation modifications */
     if (ppm->has_global_osc == _TRUE_) {
@@ -4353,6 +4357,15 @@ int input_read_parameters_primordial(struct file_content * pfc,
       class_read_double("A_losc", ppm->A_losc);
       class_read_double("k_losc", ppm->k_losc);
       class_read_double("x_losc", ppm->x_losc);
+    }
+    /**(Jon) 1.b.3.3) For axion monodromy oscillation modifications */
+    if (ppm->has_axion_osc == _TRUE_) {
+      /* Read */
+      class_read_double("A_ax_sin", ppm->A_ax_sin);
+      class_read_double("A_ax_cos", ppm->A_ax_cos);
+      class_read_double("f_ax_Mpl", ppm->f_ax_Mpl);
+      class_read_double("p_f_ax", ppm->p_f_ax);
+      class_read_double("p_ax", ppm->p_ax);
     }
   }
 
@@ -6124,6 +6137,12 @@ int input_default_params(struct background *pba,
   ppm->A_losc = 0.;  
   ppm->k_losc = 0.01;
   ppm->x_losc = 1.;
+  /**(Jon) 1.b.3.3) For axion monodromy oscillation model */
+  ppm->A_ax_sin = 0.;
+  ppm->A_ax_cos = 0.;
+  ppm->f_ax_Mpl = 0.1;
+  ppm->p_f_ax = 0.;
+  ppm->p_ax = 4.0/3.0;
   /** 1.c) For type 'inflation_V' */
   /** 1.c.2) Coefficients of the Taylor expansion */
   ppm->V0=1.25e-13;

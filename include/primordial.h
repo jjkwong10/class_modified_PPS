@@ -180,6 +180,14 @@ struct primordial {
   double k_losc; /**(Jon)< position of step in k-space */
   double x_losc; /**(Jon)< width of the envelope function */
 
+  /* (Jon) modification 3: axion monodromy oscillation model */
+  short has_axion_osc; /**(Jon)< flag for axion monodromy oscillation modification */
+  double A_ax_sin; /**(Jon)< axion generated global oscillation feature sine amplitude (relative to analytic amplitude) */
+  double A_ax_cos; /**(Jon)< axion generated  global oscillation feature cosine amplitude (relative to analytic amplitude) */
+  double f_ax_Mpl; /**(Jon)< frequency of the underlying axion decay constant */
+  double p_f_ax; /**(Jon)< frequency drift */
+  double p_ax; /**(Jon)< self-interaction exponent */
+
   /** parameters describing the case primordial_spec_type = inflation_V */
 
   enum potential_shape potential;
